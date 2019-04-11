@@ -1,0 +1,47 @@
+{
+  "name": "lab-1-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.8.1",
+    "animate.css": "^3.7.0",
+    "axios": "^0.18.0",
+    "bootstrap": "^4.3.1",
+    "bootstrap-vue": "^2.0.0-rc.17",
+    "bulma": "^0.7.4",
+    "core-js": "^2.6.5",
+    "element-ui": "^2.7.2",
+    "pretty-checkbox-vue": "^1.1.9",
+    "v-animate-css": "0.0.3",
+    "vee-validate": "^2.2.2",
+    "vue": "^2.6.6",
+    "vue-axios": "^2.1.4",
+    "vue-form-json": "^1.1.0",
+    "vue-good-table": "^2.16.3",
+    "vue-router": "^3.0.1",
+    "vue-tables-2": "^1.4.70"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.5.0",
+    "@vue/cli-plugin-eslint": "^3.5.0",
+    "@vue/cli-service": "^3.5.0",
+    "babel-eslint": "^10.0.1",
+    "electron": "^4.0.0",
+    "eslint": "^5.8.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "vue-cli-plugin-electron-builder": "^1.2.0",
+    "vue-cli-plugin-element": "^1.0.1",
+    "vue-template-compiler": "^2.5.21",
+    "vue2-simplert": "^1.0.0"
+  },
+  "main": "background.js"
+}
