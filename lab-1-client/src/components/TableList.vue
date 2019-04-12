@@ -4,12 +4,19 @@
       :rows="tableData" 
       :columns="columns" 
       :selectOptions="selectOption"
+      max-height="500px"
       @on-row-dblclick="viewTable"
       @on-selected-rows-change="selectionChanged">
       <div slot="selected-row-actions">
         <button class="btn btn-danger" @click="deleteTable" >Delete</button>
       </div>
     </vue-good-table>
+    <hr>
+    <div class="form-group offset-1 col-10">
+      <label for="comment">Custom request to SQLite:</label>
+      <textarea v-model="request" class="form-control" rows="5" id="comment"></textarea>
+    </div>
+    <button class="btn btn-lg btn-outline-success btn-block mt-2 offset-1 col-10" @click="sendCustomReq">Send request</button>
   </div>
 </template>
 
@@ -32,7 +39,8 @@ export default {
         selectionText: 'rows selected',
         clearSelectionText: 'clear',
       },
-      selectedTables: []
+      selectedTables: [],
+      request: ""
     }
   },
   methods: {
@@ -52,6 +60,15 @@ export default {
     selectionChanged: function (params) {
       this.selectedTables = params.selectedRows.map(item => item.tableName)
       console.log(this.selectedTables)
+    },
+    sendCustomReq: function () {
+      this.axios.post('http://localhost:8000/db/customreq', this.request, {headers: {
+        'Access-Control-Allow-Origin': '*'
+      }}).then((res) => {
+        console.log(res)
+      }).catch((err) => {
+        alert(err)
+      })
     }
   }, 
   created () {
@@ -66,3 +83,6 @@ export default {
   }
 }
 </script>
+headers: {
+        'Access-Control-Allow-Origin': '*'
+      }}

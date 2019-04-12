@@ -4,7 +4,7 @@ connectDB = (sql) => {
         if (err) {
             console.log(err.message);
         } else {
-            console.log('Connected to the chinook database.');
+            //console.log('Connected to the chinook database.');
             
         }            
     });
@@ -162,6 +162,46 @@ module.exports = function(app, sql) {
         } else {
             res.send('OK')
         }
-
     })
+
+    app.post('/db/customreq', (req, res) => {
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
+        let error = []
+        console.log('body:', Object.keys(req.body)[0])
+
+        db.serialize(() => {
+            if (Object.keys(req.body)[0].split(' ')[0] == 'select' || Object.keys(req.body)[0].split(' ')[0] == 'SELECT') {
+                db.all(`${Object.keys(req.body)[0]}`, (err, rows) => {
+                    if (err) {
+                        console.log(err.message)
+                        res.status(400).send(err.message)
+                    } else {
+                        if (rows) {
+                            res.send(rows)
+                            console.log('rows',rows)
+                        } else {
+                            console.log('rows',rows)
+                            res.send("ok")
+                        }
+                    }
+                })
+            } else {
+               db.run(`${Object.keys(req.body)[0]}`, (err, rows) => {
+                    if (err) {
+                        console.log(err.message)
+                        res.status(400).send(err.message)
+                    } else {
+                        if (rows) {
+                            res.send(rows)
+                            console.log('rows',rows)
+                        } else {
+                            console.log('rows',rows)
+                            res.send("ok")
+                        }
+                    }
+                }) 
+            }    
+        })
+    }) 
 };
