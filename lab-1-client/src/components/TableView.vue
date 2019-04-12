@@ -1,11 +1,11 @@
 <template>
   <div>
-    <vue-good-table :rows="tableData" :columns="columns"/>
+    <vue-good-table  max-height="500px" :fixed-header="true" :rows="tableData" :columns="columns"/>
     <div>
       <form-json v-if="formShow" class="shadow-lg p-3 mb-5 bg-white rounded fixed-top container-fluid h-100 justify-content-center align-items-center border-solid" :formFields="schema" :formName="name" v-model="newItem"></form-json>
     </div>
 
-      <button class="btn btn-lg btn-outline-success btn-block offset-1 col-10" @click="insertData">Insert Data</button>
+      <button class="btn btn-lg btn-outline-success btn-block mt-2 offset-1 col-10" @click="insertData">Insert Data</button>
   </div>
 </template>
 
@@ -76,13 +76,14 @@ export default {
   },
   mounted () {
     this.$root.$on('formSubmitted', values => {
+      console.log('bug')
       this.formShow = false;
       console.log(values)
       this.axios.post(`http://localhost:8000/db/tableinsert/${this.tableName}`, values, {
         headers: {
           'Access-Control-Allow-Origin': '*'
         }}).then(() => {
-          alert("insert Sucsess")
+          this.$router.go(`tableview/${this.tableName}`)
         }).catch(err => {
           alert(err)
         })

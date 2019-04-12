@@ -111,20 +111,18 @@ module.exports = function(app, sql) {
         res.header('Access-Control-Allow-Origin', '*')
         let db = connectDB(sql)
         console.log(req.body)
-        let values = ""
+        let values = "("
         let cols = ""
         let sings = ""
 
         Object.keys(req.body.values).forEach((item, index) =>  {
             if (item != "undefined") {
-                cols += ` ${item}` 
+                cols += (index > 0) ? ` ${item}` : `${item}`
                 cols += (index < Object.keys(req.body.values).length - 1) ? ',' : ''
-                sings += ' (?)'
-                sings += (index < Object.keys(req.body.values).length - 1) ? ',' : ''
                 console.log(item)
 
-                values += `(${req.body.values[item]})`
-                values += (index < Object.keys(req.body.values).length - 1) ? ',' : ''
+                values += `"${req.body.values[item]}"`
+                values += (index < Object.keys(req.body.values).length - 1) ? ',' : ')'
             }
         })
         console.log(values)
