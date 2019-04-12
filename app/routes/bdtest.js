@@ -142,4 +142,26 @@ module.exports = function(app, sql) {
             })
         })
     })
+
+    app.post('/db/tabledelete', (req, res) => {        
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
+        let error = []
+        db.serialize(() => {
+            req.body.forEach(item => {
+                db.run(`DROP TABLE ${item}`, err => {
+                    if (err) {
+                        console.log(err.message)
+                        error.push(err.message)
+                    }
+                }) 
+            })
+        })
+        if (error.length > 0) {
+            res.status(400).send(error)
+        } else {
+            res.send('OK')
+        }
+
+    })
 };

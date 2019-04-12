@@ -1,6 +1,8 @@
 <template>
   <div>
-    <vue-good-table  max-height="500px" :fixed-header="true" :rows="tableData" :columns="columns"/>
+    <vue-good-table  max-height="500px" :fixed-header="true" :rows="tableData" :columns="columns">
+      
+    </vue-good-table>
     <div>
       <form-json v-if="formShow" class="shadow-lg p-3 mb-5 bg-white rounded fixed-top container-fluid h-100 justify-content-center align-items-center border-solid" :formFields="schema" :formName="name" v-model="newItem"></form-json>
     </div>
@@ -33,7 +35,8 @@ export default {
       tableData: [],
       actions: [],
       schema: [],
-      newItem: {}
+      newItem: {},
+      menuItems: []
     }
   },
   methods: {

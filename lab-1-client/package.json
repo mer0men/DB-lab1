@@ -25,6 +25,7 @@
     "vee-validate": "^2.2.2",
     "vue": "^2.6.6",
     "vue-axios": "^2.1.4",
+    "vue-context-menu-popup": "^1.0.4",
     "vue-form-json": "^1.1.0",
     "vue-good-table": "^2.16.3",
     "vue-router": "^3.0.1",
