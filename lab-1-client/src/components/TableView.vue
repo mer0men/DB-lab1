@@ -1,13 +1,11 @@
 <template>
   <div>
-    <simplert 
-      :useRadius="true"
-      :useIcon="false"
-      refs="simplert">
-    </simplert>
     <vue-good-table :rows="tableData" :columns="columns"/>
-    <form-json v-if="insertForm" :formFields="schema" :formName="name" v-model="newItem"></form-json>
-    <button class="btn btn-dark" @click="openAlert">asd</button>
+    <div>
+      <form-json v-if="formShow" class="shadow-lg p-3 mb-5 bg-white rounded fixed-top container-fluid h-100 justify-content-center align-items-center border-solid" :formFields="schema" :formName="name" v-model="newItem"></form-json>
+    </div>
+
+      <button class="btn btn-lg btn-outline-success btn-block offset-1 col-10" @click="insertData">Insert Data</button>
   </div>
 </template>
 
@@ -16,14 +14,11 @@ import { VueGoodTable } from 'vue-good-table'
 import 'bulma/css/bulma.min.css'
 import 'vue-form-json/dist/vue-form-json.css'
 import formJson from 'vue-form-json'
-import Simplert from 'vue2-simplert'
-require('vue2-simplert/dist/simplert.css')
 
 export default {
   components: {
     VueGoodTable,
-    formJson,
-    Simplert
+    formJson
   },
   props: {
     tableName: {
@@ -32,27 +27,18 @@ export default {
   },
   data () {
     return {
-      obj: {
-        title: 'Custom Function',
-        message: 'Click close to trigger custom function',
-        type: 'info',
-        onClose: this.onClose
-      },
       name: 'name',
+      formShow: false,
       columns: [],
       tableData: [],
       actions: [],
       schema: [],
-      newItem: {},
-      insertForm: false
+      newItem: {}
     }
   },
   methods: {
-    onClose: function () {
-      console.log("alert closed")
-    },
-    openAlert: function () {
-      console.log(this.$refs.simplert)
+    insertData: function () {
+      this.formShow = true;
     }
   },
   created () {
@@ -86,6 +72,20 @@ export default {
         this.insertForm = true
         console.log(this.schema)
       })
+    })
+  },
+  mounted () {
+    this.$root.$on('formSubmitted', values => {
+      this.formShow = false;
+      console.log(values)
+      this.axios.post(`http://localhost:8000/db/tableinsert/${this.tableName}`, values, {
+        headers: {
+          'Access-Control-Allow-Origin': '*'
+        }}).then(() => {
+          alert("insert Sucsess")
+        }).catch(err => {
+          alert(err)
+        })
     })
   }
 }

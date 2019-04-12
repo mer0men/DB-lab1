@@ -63,9 +63,11 @@ export default {
       this.tableFields.splice(indx, 1)
     },
     createTable: function () {
+      console.log()
       for (let item in this.tableFields) {
-        let arrayName = item.name.splite(' ')
-        item.name = arrayName.length > 1 ? arrayName.join('_') : item.name
+        let arrayName = this.tableFields[item].name.split(' ')
+        console.log(arrayName)
+        this.tableFields[item].name = arrayName.length > 1 ? arrayName.join('_') : this.tableFields[item].name
       }
 
       let obj = {

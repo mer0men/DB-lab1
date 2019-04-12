@@ -84,6 +84,7 @@ module.exports = function(app, sql) {
                 if (err) {
                     res.send(err.message);
                 } else {
+                    console.log('rows view', rows)
                     res.send(rows);
                 }
             })
@@ -92,7 +93,7 @@ module.exports = function(app, sql) {
 
     app.get('/db/tablelist/', (req, res) => {
         res.header('Access-Control-Allow-Origin', '*')
-        let db = connectDB(sql);   
+        let db = connectDB(sql)
 
         db.all(`SELECT name FROM sqlite_master WHERE type ='table'`, (err, rows) => {
             if (err) {
@@ -103,6 +104,44 @@ module.exports = function(app, sql) {
                 console.log(rows);
                 res.send(rows)
             }
+        })
+    })
+
+    app.post('/db/tableinsert/:tablename', (req, res) => {
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
+        console.log(req.body)
+        let values = ""
+        let cols = ""
+        let sings = ""
+
+        Object.keys(req.body.values).forEach((item, index) =>  {
+            if (item != "undefined") {
+                cols += ` ${item}` 
+                cols += (index < Object.keys(req.body.values).length - 1) ? ',' : ''
+                sings += ' (?)'
+                sings += (index < Object.keys(req.body.values).length - 1) ? ',' : ''
+                console.log(item)
+
+                values += `(${req.body.values[item]})`
+                values += (index < Object.keys(req.body.values).length - 1) ? ',' : ''
+            }
+        })
+        console.log(values)
+        console.log('cols:', cols)
+        console.log(sings)
+        let string =  `INSERT INTO ${req.params.tablename}(${cols}) VALUES${values}`
+        console.log('sql:', string)
+        db.serialize(() => {
+            db.run(`INSERT INTO ${req.params.tablename}(${cols}) VALUES${values}`, err => {
+                if (err) {
+                    console.log('err', err.message)
+                    res.send(err.message)                    
+                } else {
+                    console.log('insert into table suc')
+                    res.sendStatus(200)
+                }   
+            })
         })
     })
 };
