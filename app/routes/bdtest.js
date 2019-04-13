@@ -227,4 +227,44 @@ module.exports = function(app, sql) {
             }
         })            
     })
+
+    app.post('/db/addcolumn/:tablename', (req, res) => {
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
+        console.log(req.body)
+        db.serialize(() => {
+            db.run(`ALERT TABLE ${req.params.tableName} ADD COLUMN ${req.body.name} ${req.body.type} ${req.body.option}`, err => {
+                if (err) {
+                    console.log(err.message)
+                    res.sendStatus(400).send(err.message)
+                } else {
+                    console.log("add column suc")
+                    res.send("OK")
+                }
+            })
+        })
+    })
+
+    app.post('/db/deletecolumn/:tablename', (req, res) => {
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
+        console.log(req.body) 
+            let newRows = []
+        db.serialize(() => {
+            db.all(`pragma table_info(${req.params.tablename})`, (err, rows) => {
+                if (err) {
+                    console.log(err.message)
+                } else {
+                    let temp = rows.map(item => item.name).indexOf(req.body.name)
+                    rows.splice(temp, 1)                                    
+                    let rowsTypeString = ""
+                    // TODO CREATE ROW STRING
+                    rows.forEach(item => {})
+                }
+            })            
+              .run(`ALERT TABLE ${req.params.tablename} RENAME TO ${req.params.tablename}_DELCOLUMN`, err => console.log(err.message))
+              .run(`CREATE TABLE ${req.params.tablename}`)  
+        })      
+
+    })
 };

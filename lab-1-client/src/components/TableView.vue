@@ -1,7 +1,7 @@
 <template>
   <div>
     <vue-good-table  
-      max-height="500px" 
+      max-height="250px" 
       :fixed-header="true" 
       :rows="tableData" 
       :columns="columns"
@@ -15,7 +15,41 @@
       <form-json v-if="formShow" class="shadow-lg p-3 mb-5 bg-white rounded fixed-top container-fluid h-100 justify-content-center align-items-center border-solid" :formFields="schema" :formName="name" v-model="newItem"></form-json>
     </div>
 
-      <button v-if="this.tableName !== `custom`" class="btn btn-lg btn-outline-success btn-block mt-2 offset-1 col-10" @click="insertData">Insert Data</button>
+    <button v-if="this.tableName !== `custom`" class="btn btn-lg btn-outline-success btn-block mt-2 offset-1 col-10" @click="insertData">Insert Data</button>
+    <hr>
+    <div class="row mt-2">
+      <div class="col-sm ml-2">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Add column</h5>
+            <label for="newColInput">Column name</label>
+            <input id="newColInput" v-model="newColumn.name" placeholder="Name" type="text" name="" class="form-control">
+            <select placeholder="option" class="form-control mt-2" v-model="newColumn.type">
+              <option disabled value="">Type</option>
+              <option>NULL</option>
+              <option>INTEGER</option>
+              <option>REAL</option>
+              <option>TEXT</option>
+              <option>BLOB</option>
+            </select>
+            <label for="newColInputOpt">Options</label>
+            <input id="newColInputOpt" placeholder="Options" v-model="newColumn.option" type="text" name="" class="form-control">
+            <button class="btn btn-outline-success mt-2" @click="addColumn">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm mr-2">
+        <div class="card">
+          <div class="card-body">
+              <h5 class="card-title">Delete column</h5>
+              <select class="form-control" v-model="columnForDelete">
+                <option v-for="item in columnsForDelete" :key="item">{{ item }}</option>
+              </select>
+              <button class="btn mt-2 btn-outline-danger" @click="deleteColumn">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -48,6 +82,9 @@ export default {
       schema: [],
       newItem: {},
       selectedRows: [],
+      newColumn: {},
+      columnForDelete: "",
+      columnsForDelete: [],
       selectOption: {
         enabled: true,
         selectOnCheckboxOnly: true,
@@ -74,6 +111,26 @@ export default {
       }).catch((err) => {
         console.log(err)
       })
+    },
+    addColumn: function () {
+      this.axios.post(`http://localhost:8000/db/addcolumn/${this.tableName}`, this.newColumn,  {headers: {
+        'Access-Control-Allow-Origin': '*'
+      }}).then(() => {
+        console.log("OK")
+        this.$router.go()
+      }).catch(err => {
+        console.log(err)
+      }) 
+    },
+    deleteColumn: function () {
+      this.axios.post(`http://localhost:8000/db/deletecolumn/${this.tableName}`, this.columnForDelete,  {headers: {
+        'Access-Control-Allow-Origin': '*'
+      }}).then(() => {
+        console.log("OK")
+        this.$router.go()
+      }).catch(err => {
+        console.log(err)
+      })
     }
   },
   created () {
@@ -85,7 +142,8 @@ export default {
         console.log(res.data)
         this.axios.get(`http://localhost:8000/db/tableschema/${this.tableName}`, {headers: {
           'Access-Control-Allow-Origin': '*'
-        }}).then((res) => {          
+        }}).then((res) => {
+          console.log('rows:', res.data)          
           let schemaObj = [
             {
               'html' : `<h1>Добавить элемент в таблицу ${this.tableName}</h1>`,
@@ -102,6 +160,8 @@ export default {
               'field': item.name,
               'label': item.name
             })
+
+            this.columnsForDelete.push(item.name)
 
             schemaObj.push({
               'label': item.name,
