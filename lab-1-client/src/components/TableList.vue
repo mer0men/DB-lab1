@@ -4,6 +4,7 @@
       :rows="tableData" 
       :columns="columns" 
       :selectOptions="selectOption"
+      :fixed-header="true"
       max-height="500px"
       @on-row-dblclick="viewTable"
       @on-selected-rows-change="selectionChanged">
@@ -22,6 +23,7 @@
 
 <script>
 import { VueGoodTable } from 'vue-good-table'
+import { eventBus } from '../main'
 
 export default {
   components: {
@@ -65,7 +67,12 @@ export default {
       this.axios.post('http://localhost:8000/db/customreq', this.request, {headers: {
         'Access-Control-Allow-Origin': '*'
       }}).then((res) => {
-        console.log(res)
+        if (res.data.type === 'customTable') {
+          eventBus.$emit('customTableData', res.data.rows)
+          this.$router.push('/tableview/custom')
+        }
+
+        console.log(res.data)
       }).catch((err) => {
         alert(err)
       })
@@ -83,6 +90,3 @@ export default {
   }
 }
 </script>
-headers: {
-        'Access-Control-Allow-Origin': '*'
-      }}

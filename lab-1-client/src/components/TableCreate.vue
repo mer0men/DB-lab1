@@ -85,7 +85,7 @@ export default {
           console.log('Error:', res.status)
         } else {
           console.log(res)
-          this.$router.push('/tablelist')
+          this.$router.go()
         }
       })
     }

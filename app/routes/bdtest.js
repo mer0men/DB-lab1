@@ -80,7 +80,7 @@ module.exports = function(app, sql) {
         let db = connectDB(sql);
 
         db.serialize(() => {
-            db.all(`SELECT * FROM ${req.params.tablename}`, (err, rows) => {
+            db.all(`SELECT rowid, * FROM ${req.params.tablename}`, (err, rows) => {
                 if (err) {
                     res.send(err.message);
                 } else {
@@ -178,11 +178,11 @@ module.exports = function(app, sql) {
                         res.status(400).send(err.message)
                     } else {
                         if (rows) {
-                            res.send(rows)
+                            res.send({'type': 'customTable', 'rows': rows})
                             console.log('rows',rows)
                         } else {
                             console.log('rows',rows)
-                            res.send("ok")
+                            res.send({'type': 'emptyCustomTable', 'status': 'OK' })
                         }
                     }
                 })
@@ -197,11 +197,34 @@ module.exports = function(app, sql) {
                             console.log('rows',rows)
                         } else {
                             console.log('rows',rows)
-                            res.send("ok")
+                            res.send({'type': 'customRequest', 'status': 'OK'})
                         }
                     }
                 }) 
             }    
         })
     }) 
+
+    app.post('/db/rowsdelete/:tablename', (req, res) => {
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
+        let errors = []
+        console.log(req.body)
+        db.serialize(() => {    
+            req.body.forEach(item => {
+                db.run(`DELETE from ${req.params.tablename} WHERE rowid = ${item}`, err => {
+                    if (err){
+                        errors.push(err.message)
+                    } else {
+                        console.log('delete suc')
+                    }
+                })
+            })
+            if (errors.length > 0) {
+                res.status(400).send(errors)
+            } else {
+                res.send("OK")
+            }
+        })            
+    })
 };
