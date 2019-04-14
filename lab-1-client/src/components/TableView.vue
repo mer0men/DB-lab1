@@ -18,7 +18,7 @@
     <button v-if="this.tableName !== `custom`" class="btn btn-lg btn-outline-success btn-block mt-2 offset-1 col-10" @click="insertData">Insert Data</button>
     <hr>
     <div class="row mt-2">
-      <div class="col-sm ml-2">
+      <div class="col-sm ml-2 mr-2">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Add column</h5>
@@ -38,7 +38,8 @@
           </div>
         </div>
       </div>
-      <div class="col-sm mr-2">
+
+      <!-- <div class="col-sm mr-2">
         <div class="card">
           <div class="card-body">
               <h5 class="card-title">Delete column</h5>
@@ -48,7 +49,7 @@
               <button class="btn mt-2 btn-outline-danger" @click="deleteColumn">Delete</button>
           </div>
         </div>
-      </div>
+      </div>             -->
     </div>
   </div>
 </template>
@@ -172,8 +173,8 @@ export default {
           this.schema = schemaObj
           this.insertForm = true
           console.log('schema: ', this.schema)
-        })
-      })
+        }).catch(err => console.log(err))
+      }).catch(err => console.log(err))
     } else {
       console.log('tablename', this.tableName)
       console.log(Object.keys(this.customTableData[0]))

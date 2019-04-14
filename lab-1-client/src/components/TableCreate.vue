@@ -20,7 +20,11 @@
         </select>
       </div>
       <div class="col">
-        <input class="form-control" :id="-id" v-model="tableFields[id].option" placeholder="Oprion" type="text" />        
+          <p-check class="p-switch" v-model="tableFields[id].option.NOT_NULL.need">NOT NULL </p-check>
+          <p-check class="p-switch" v-model="tableFields[id].option.UNIQUE.need">UNIQUE </p-check>
+          <p-check class="p-switch" v-model="tableFields[id].option.PRIMARY_KEY.need">PRIMARY KEY </p-check>
+          <p-check class="p-switch" v-model="tableFields[id].option.DEFAULT.need">DEFAULT</p-check>
+          <input class="form-control" :id="-id" :disabled="!tableFields[id].option.DEFAULT.need" v-model="tableFields[id].option.DEFAULT.value" placeholder="DEFAULT value" type="text" />        
       </div>
       <div class="col-1 ">
         <button type="button" @click="removeField(field.id)" class="close float-left text-danger" aria-label="Close">
@@ -43,7 +47,21 @@ class TableField {
     this.id = id
     this.name = ''
     this.type = ''
-    this.option = ''
+    this.option = {
+      'NOT_NULL': {
+        'need': false
+      },
+      'UNIQUE': {
+        'need': false
+      },
+      'PRIMARY_KEY': {
+        'need': false
+      },
+      'DEFAULT': {
+        'need': false,
+        'value': ''
+      }
+    }
   }
 }
 

@@ -233,10 +233,10 @@ module.exports = function(app, sql) {
         let db = connectDB(sql)
         console.log(req.body)
         db.serialize(() => {
-            db.run(`ALERT TABLE ${req.params.tableName} ADD COLUMN ${req.body.name} ${req.body.type} ${req.body.option}`, err => {
+            db.run(`ALTER TABLE ${req.params.tablename} ADD COLUMN ${req.body.name} ${req.body.type} ${req.body.option}`, err => {
                 if (err) {
                     console.log(err.message)
-                    res.sendStatus(400).send(err.message)
+                    res.status(400).send(err.message)
                 } else {
                     console.log("add column suc")
                     res.send("OK")
@@ -245,26 +245,54 @@ module.exports = function(app, sql) {
         })
     })
 
+    // TODO 
     app.post('/db/deletecolumn/:tablename', (req, res) => {
         res.header('Access-Control-Allow-Origin', '*')
         let db = connectDB(sql)
         console.log(req.body) 
-            let newRows = []
+        let rowsTypeString = ""
+        let newRows = []
         db.serialize(() => {
-            db.all(`pragma table_info(${req.params.tablename})`, (err, rows) => {
+            db.all(`pragma table_info(${req.params.tablename})`,  (err, rows) => {
                 if (err) {
                     console.log(err.message)
                 } else {
                     let temp = rows.map(item => item.name).indexOf(req.body.name)
-                    rows.splice(temp, 1)                                    
-                    let rowsTypeString = ""
-                    // TODO CREATE ROW STRING
-                    rows.forEach(item => {})
+                    rows.splice(temp, 1)                                   
+                    newRows = rows
+                    console.log('newrows:', newRows)
+                     rows.forEach((item, index) => {
+                        rowsTypeString += `${item.name} ${item.type}`
+                        rowsTypeString += index < rows.length - 1 ? ', ' : ''
+                    })
                 }
             })            
-              .run(`ALERT TABLE ${req.params.tablename} RENAME TO ${req.params.tablename}_DELCOLUMN`, err => console.log(err.message))
-              .run(`CREATE TABLE ${req.params.tablename}`)  
-        })      
+            db.run(`ALTER TABLE ${req.params.tablename} RENAME TO ${req.params.tablename}_DELCOLUMN`, err => {
+                if (err) 
+                    console.log('Rename', err.message)
+                else
+                    console.log("RENAME OK")
+              })
+            db.run(`CREATE TABLE ${req.params.tablename}(${rowsTypeString});`, err => {
+                if (err) {
+                    console.log(`CREATE TABLE ${req.params.tablename}(${rowsTypeString})`)
+                    console.log('crate', err.message)
+                } else
+                    console.log("CREATE OK")
+              })
+            db.run(`INSERT INTO ${req.params.tablename}( ${newRows.map(item => item.name).join(' ')} ) 
+                        SELECT ${newRows.map(item => item.name).join(' ')} 
+                        FROM ${req.params.tablename}_DELCOLUMN ;`, err => {
+                            if (err) {
+                                console.log(`INSERT INTO ${req.params.tablename}( ${newRows.map(item => item.name).join(' ')} ) 
+                                SELECT ${newRows.map(item => item.name).join(', ')} 
+                                FROM ${req.params.tablename}_DELCOLUMN`)
+                                console.log('insert', err.message)
+                            } else
+                                console.log("insert OK")
+                          }) 
 
+            res.send("OK")            
+        })      
     })
 };
