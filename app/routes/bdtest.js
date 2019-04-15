@@ -2,22 +2,22 @@
 connectDB = (sql) => {
     return db = new sql.Database('policlinic.db', sql.OPEN_READWRITE | sql.OPEN_CREATE, (err) => {
         if (err) {
-            console.log(err.message);
+            console.log(err.message)
         } else {
-            //console.log('Connected to the chinook database.');
+            //console.log('Connected to the chinook database.')
             
         }            
-    });
+    })
 }
 
 module.exports = function(app, sql) {
     app.get('/db/create', (req, res) => {
-        let db = connectDB(sql);
+        let db = connectDB(sql)
     })
 
     app.post('/db/tablecreate', (req, res) => {
         res.header('Access-Control-Allow-Origin', '*')
-        let db = connectDB(sql);
+        let db = connectDB(sql)
 
         console.log('body', Object.keys(req.body))
         let tableOptions = {
@@ -27,16 +27,20 @@ module.exports = function(app, sql) {
 
         console.log('option', tableOptions)
         //let body = JSON.parse(req.body)
-        let resRows = [];
+        let resRows = []
         let dataType = ""
 
         tableOptions.fields.forEach((key, index) => {
             dataType += key.name + ' '
             dataType += key.type + ' '
-            dataType += key.option + ' '
+            dataType += key.option.NOT_NULL.need ? 'NOT NULL ' : ''
+            dataType += key.option.UNIQUE.need ? 'UNIQUE ' : ''
+            dataType += key.option.PRIMARY_KEY.need ? 'PRIMARY KEY ' : ''
+            dataType += key.option.DEFAULT.need ? `DEFAULT ${key.option.DEFAULT.value} ` : ''
             dataType += ((index != tableOptions.fields.length - 1) ? ', ' : '')
-        });
+        })
 
+        console.log(`CREATE TABLE ${tableOptions.name}(${dataType})`)
         db.serialize(() => {
             db.run(`CREATE TABLE ${tableOptions.name}(${dataType})`, (err) => {
                 if (err) {
@@ -46,22 +50,22 @@ module.exports = function(app, sql) {
                     return res.send(err.message)
                 }
             })
-        });
+        })
 
         db.close((err)=> {
             if (err) {
                 console.log(err.message)
                 res.send(err)
             } else {
-                console.log(resRows);
-                res.send(resRows); 
+                console.log(resRows)
+                res.send(resRows) 
             }
         })        
     })
 
     app.get('/db/tableschema/:tablename', (req, res) => {
-        res.header('Access-Control-Allow-Origin', '*');
-        let db = connectDB(sql);
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
         
         db.serialize(() => {
             db.all(`pragma table_info(${req.params.tablename})`, (err, rows) => {
@@ -76,16 +80,16 @@ module.exports = function(app, sql) {
     })
 
     app.get('/db/viewtable/:tablename', (req, res) => {
-        res.header('Access-Control-Allow-Origin', '*');
-        let db = connectDB(sql);
+        res.header('Access-Control-Allow-Origin', '*')
+        let db = connectDB(sql)
 
         db.serialize(() => {
             db.all(`SELECT rowid, * FROM ${req.params.tablename}`, (err, rows) => {
                 if (err) {
-                    res.send(err.message);
+                    res.send(err.message)
                 } else {
                     console.log('rows view', rows)
-                    res.send(rows);
+                    res.send(rows)
                 }
             })
         })
@@ -97,11 +101,11 @@ module.exports = function(app, sql) {
 
         db.all(`SELECT name FROM sqlite_master WHERE type ='table'`, (err, rows) => {
             if (err) {
-                console.log(err);
+                console.log(err)
                 res.send(err.message)
-                return 1;
+                return 1
             } else {
-                console.log(rows);
+                console.log(rows)
                 res.send(rows)
             }
         })
@@ -225,7 +229,7 @@ module.exports = function(app, sql) {
             } else {
                 res.send("OK")
             }
-        })            
+        })
     })
 
     app.post('/db/addcolumn/:tablename', (req, res) => {
@@ -256,43 +260,57 @@ module.exports = function(app, sql) {
             db.all(`pragma table_info(${req.params.tablename})`,  (err, rows) => {
                 if (err) {
                     console.log(err.message)
+                    res.send(err.message)
                 } else {
                     let temp = rows.map(item => item.name).indexOf(req.body.name)
-                    rows.splice(temp, 1)                                   
+                    rows.splice(temp, 1) 
                     newRows = rows
                     console.log('newrows:', newRows)
-                     rows.forEach((item, index) => {
+                    rows.forEach((item, index) => {
                         rowsTypeString += `${item.name} ${item.type}`
                         rowsTypeString += index < rows.length - 1 ? ', ' : ''
                     })
+                    db.run(`ALTER TABLE ${req.params.tablename} RENAME TO ${req.params.tablename}_DELCOLUMN`, err => {
+                        if (err) {
+                            console.log('Rename', err.message)
+                            res.send(err.message)
+                        } else {
+                            console.log("RENAME OK")
+                            db.run(`CREATE TABLE ${req.params.tablename}(${rowsTypeString})`, err => {
+                                if (err) {
+                                    console.log(`CREATE TABLE ${req.params.tablename}(${rowsTypeString})`)
+                                    console.log('crate', err.message)
+                                    res.send(err.message)
+                                } else{
+                                    console.log("CREATE OK")
+                                    db.run(`INSERT INTO ${req.params.tablename}( ${newRows.map(item => item.name).join(', ')} )
+                                        SELECT ${newRows.map(item => item.name).join(', ')} 
+                                        FROM ${req.params.tablename}_DELCOLUMN `, err => {
+                                        if (err) {
+                                            console.log(`INSERT INTO ${req.params.tablename}( ${newRows.map(item => item.name).join(', ')} )
+                                            SELECT ${newRows.map(item => item.name).join(', ')} 
+                                            FROM ${req.params.tablename}_DELCOLUMN`)
+                                            console.log('insert', err.message)
+                                            res.send(err.message)
+                                        } else{
+                                            console.log("insert OK")
+                                            db.run(`DROP TABLE ${req.params.tablename}_DELCOLUMN`, err => {
+                                                if (err) {
+                                                    console.log('drop:', err.message)                                                    
+                                                    res.send(err.message)
+                                                } else {
+                                                    console.log('DROP OK')
+                                                    res.send('OK')
+                                                }
+                                            })
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
                 }
-            })            
-            db.run(`ALTER TABLE ${req.params.tablename} RENAME TO ${req.params.tablename}_DELCOLUMN`, err => {
-                if (err) 
-                    console.log('Rename', err.message)
-                else
-                    console.log("RENAME OK")
-              })
-            db.run(`CREATE TABLE ${req.params.tablename}(${rowsTypeString});`, err => {
-                if (err) {
-                    console.log(`CREATE TABLE ${req.params.tablename}(${rowsTypeString})`)
-                    console.log('crate', err.message)
-                } else
-                    console.log("CREATE OK")
-              })
-            db.run(`INSERT INTO ${req.params.tablename}( ${newRows.map(item => item.name).join(' ')} ) 
-                        SELECT ${newRows.map(item => item.name).join(' ')} 
-                        FROM ${req.params.tablename}_DELCOLUMN ;`, err => {
-                            if (err) {
-                                console.log(`INSERT INTO ${req.params.tablename}( ${newRows.map(item => item.name).join(' ')} ) 
-                                SELECT ${newRows.map(item => item.name).join(', ')} 
-                                FROM ${req.params.tablename}_DELCOLUMN`)
-                                console.log('insert', err.message)
-                            } else
-                                console.log("insert OK")
-                          }) 
-
-            res.send("OK")            
-        })      
+            })
+        })
     })
-};
+}

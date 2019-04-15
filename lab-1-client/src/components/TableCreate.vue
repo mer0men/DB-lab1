@@ -25,7 +25,7 @@
           <p-check class="p-switch" v-model="tableFields[id].option.PRIMARY_KEY.need">PRIMARY KEY </p-check>
           <p-check class="p-switch" v-model="tableFields[id].option.DEFAULT.need">DEFAULT</p-check>
           <input class="form-control" :id="-id" :disabled="!tableFields[id].option.DEFAULT.need" v-model="tableFields[id].option.DEFAULT.value" placeholder="DEFAULT value" type="text" />        
-      </div>
+      </div>      
       <div class="col-1 ">
         <button type="button" @click="removeField(field.id)" class="close float-left text-danger" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -103,7 +103,7 @@ export default {
           console.log('Error:', res.status)
         } else {
           console.log(res)
-          this.$router.go()
+          this.$router.push('/tablelist')
         }
       })
     }

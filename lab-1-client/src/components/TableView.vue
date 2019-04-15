@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <!-- <div class="col-sm mr-2">
+      <div class="col-sm mr-2">
         <div class="card">
           <div class="card-body">
               <h5 class="card-title">Delete column</h5>
@@ -49,7 +49,7 @@
               <button class="btn mt-2 btn-outline-danger" @click="deleteColumn">Delete</button>
           </div>
         </div>
-      </div>             -->
+      </div>
     </div>
   </div>
 </template>
